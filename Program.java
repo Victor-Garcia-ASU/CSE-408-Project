@@ -34,7 +34,7 @@ public class Program
         }
         else
         {
-            System.out.println("Fine, be that way.");
+            System.out.println("Invalid selection");
         }
     }
 
@@ -54,31 +54,84 @@ public class Program
         System.out.print("\nModel: ");
 
         choice = scanner.nextInt();
+        String firstComponent;
+        String secondComponent;
+        String thirdComponent;
+
+        switch (choice)
+        {
+            case 1:
+                firstComponent = "R";
+                secondComponent = "G";
+                thirdComponent = "B";
+                break;
+
+            case 2:
+                firstComponent = "X";
+                secondComponent = "Y";
+                thirdComponent = "Z";
+                break;
+
+            case 3:
+                firstComponent = "L";
+                secondComponent = "a";
+                thirdComponent = "b";
+                break;
+
+            case 4:
+                firstComponent = "Y";
+                secondComponent = "U";
+                thirdComponent = "V";
+                break;
+
+            case 5:
+                firstComponent = "Y";
+                secondComponent = "Cb";
+                thirdComponent = "Cr";
+                break;
+
+            case 6:
+                firstComponent = "Y";
+                secondComponent = "I";
+                thirdComponent = "Q";
+                break;
+
+            case 7:
+                firstComponent = "H";
+                secondComponent = "S";
+                thirdComponent = "L";
+                break;
+
+            default:
+                firstComponent = "R";
+                secondComponent = "G";
+                thirdComponent = "B";
+        }
 
         System.out.println("### You have Selected " + colorSpaces[choice] + " Color Model ###");
-        System.out.print("\nEnter Component Cit Red Component - ");
-        int CitRedComponent = scanner.nextInt();
-        System.out.print("\nEnter Component Cit Green Component - ");
-        int CitGreenComponent = scanner.nextInt();
-        System.out.print("\nEnter Component Cit Blue Component - ");
-        int CitBlueComponent = scanner.nextInt();
-        System.out.println("\n### Cit - < " + CitRedComponent + "," + CitGreenComponent + "," + CitBlueComponent + " > ###");
+        System.out.print("\nEnter Component Cit " + firstComponent + " Component - ");
+        int CitFirstComponent = scanner.nextInt();
+        System.out.print("\nEnter Component Cit " + secondComponent + " Component - ");
+        int CitSecondComponent = scanner.nextInt();
+        System.out.print("\nEnter Component Cit " + thirdComponent + " Component - ");
+        int CitThirdComponent = scanner.nextInt();
+        System.out.println("\n### Cit - < " + CitFirstComponent + "," + CitSecondComponent + "," + CitThirdComponent + " > ###");
 
-        System.out.print("\nEnter Component Ci0 Red Component - ");
-        int Ci0RedComponent = scanner.nextInt();
-        System.out.print("\nEnter Component Ci0 Green Component - ");
-        int Ci0GreenComponent = scanner.nextInt();
-        System.out.print("\nEnter Component Ci0 Blue Component - ");
-        int Ci0BlueComponent = scanner.nextInt();
-        System.out.println("\n### Ci0 - < " + Ci0RedComponent + "," + Ci0GreenComponent + "," + Ci0BlueComponent + "> ###");
+        System.out.print("\nEnter Component Ci0 " + firstComponent + " Component - ");
+        int Ci0FirstComponent = scanner.nextInt();
+        System.out.print("\nEnter Component Ci0 " + secondComponent + " Component - ");
+        int Ci0SecondComponent = scanner.nextInt();
+        System.out.print("\nEnter Component Ci0 " + thirdComponent + " Component - ");
+        int Ci0ThirdComponent = scanner.nextInt();
+        System.out.println("\n### Ci0 - < " + Ci0FirstComponent + "," + Ci0SecondComponent + "," + Ci0ThirdComponent + "> ###");
 
-        System.out.print("\nEnter Component Cit Red Component - ");
-        int CiTRedComponent = scanner.nextInt();
-        System.out.print("\nEnter Component Cit Green Component - ");
-        int CiTGreenComponent = scanner.nextInt();
-        System.out.print("\nEnter Component Cit Blue Component - ");
-        int CiTBlueComponent = scanner.nextInt();
-        System.out.println("\n### CiT - < " + CiTRedComponent + "," + CiTGreenComponent + "," + CiTBlueComponent + " > ###");
+        System.out.print("\nEnter Component Cit " + firstComponent + " Component - ");
+        int CiTFirstComponent = scanner.nextInt();
+        System.out.print("\nEnter Component Cit " + secondComponent + " Component - ");
+        int CiTSecondComponent = scanner.nextInt();
+        System.out.print("\nEnter Component Cit " + thirdComponent + " Component - ");
+        int CiTThirdComponent = scanner.nextInt();
+        System.out.println("\n### CiT - < " + CiTFirstComponent + "," + CiTSecondComponent + "," + CiTThirdComponent + " > ###");
 
         System.out.print("\nEnter the Number of bits <b>:");
         int b = scanner.nextInt();
@@ -98,6 +151,8 @@ public class Program
         if (showColorMap)
         {
             // TODO: Color map logic here
+            RGBObject matrix [][] = new RGBObject[10][10];
+
         }
 
         // Creates a color map (with 2^b color instances) which maps each value
@@ -112,7 +167,7 @@ public class Program
 
     }
 
-    // Calculations from www.easyrgb.com/index.php?X=MATH&H=01#text01
+    // Calculation from www.easyrgb.com/index.php?X=MATH&H=01#text01
     public static RGBObject convertXYZToRGB(double x, double y, double z)
     {
         double var_X = x / 100;
@@ -161,13 +216,84 @@ public class Program
         return rgbObject;
     }
 
+    // Calculation from www.easyrgb.com/index.php?X=MATH&H=08#text08
+    public static RGBObject convertLabToRGB(double L, double a, double b)
+    {
+        // First convert Lab to XYZ and then call convertXYZToRGB
+        double var_Y = (L + 16) / 116;
+        double var_X = a / 500 + var_Y;
+        double var_Z = var_Y - b / 200;
+
+        if (Math.pow(var_Y, 3) > 0.008856)
+        {
+            var_Y = Math.pow(var_Y, 3);
+        }
+        else
+        {
+            var_Y = (var_Y - 16 / 116) / 7.787;
+        }
+
+        if (Math.pow(var_X, 3) > 0.008856)
+        {
+            var_X = Math.pow(var_X, 3);
+        }
+        else
+        {
+            var_X = (var_X - 16 / 116) / 7.787;
+        }
+
+        if (Math.pow(var_Z, 3) > 0.008856)
+        {
+            var_Z = Math.pow(var_Z, 3);
+        }
+        else
+        {
+            var_Z = (var_Z - 16 / 116) / 7.787;
+        }
+
+        double X = 95.047 * var_X;
+        double Y = 100.000 * var_Y;
+        double Z = 108.883 * var_Z;
+
+        return convertXYZToRGB(X,Y,Z);
+    }
+
+    // Calculation from www.pcmag.com/encyclopedia/term/55166/yuv-rgb-conversion-formulas
+    public static RGBObject convertYUVToRGB(double Y, double U, double V)
+    {
+        RGBObject rgbObject = new RGBObject();
+        rgbObject.R = Y + 1.140*V;
+        rgbObject.G = Y - 0.395*U;
+        rgbObject.B = Y + 2.032*U;
+        return rgbObject;
+    }
+
+    // Calculation from stackoverflow.com/questions/4032380/ycbcr-to-rgb-from-matrix-table
+    public static RGBObject convertYCbCrToRGB(double Y, double Cb, double Cr)
+    {
+        RGBObject rgbObject = new RGBObject();
+        rgbObject.R = 1.0 * Y + 0 * Cb + 1.402 * Cr;
+        rgbObject.G = 1.0 * Y + -0.344136 * Cb - 0.714136 * Cr;
+        rgbObject.B = 1.0 * Y + 1.772 * Cb + 0 * Cr;
+        return rgbObject;
+    }
+
+    // Calculation from www.cs.rit.edu/~ncs/color/t_convert.html
+    public static RGBObject convertYIQToRGB(double Y, double I, double Q)
+    {
+        RGBObject rgbObject = new RGBObject();
+        rgbObject.R = 1 * Y + 0.956 * I + 0.621 * Q;
+        rgbObject.G = 1 * Y + -0.272 * I + -0.647 * Q;
+        rgbObject.B = 1 * Y + -1.105 * I + 1.702 * Q;
+        return rgbObject;
+    }
+
     public static void secondProgram()
     {
         System.out.println("Select a video by choosing any number between 1 and 10.");
         choice = scanner.nextInt();
 
         String videoFilePath = "C:\\Users\\JAKE\\Desktop\\sampleData\\" + Integer.toString(choice);
-        VideoCapture vc = new VideoCapture();
-        vc.open(videoFilePath);
+        // Put actual useful code here
     }
 }
