@@ -1,5 +1,4 @@
 import org.opencv.core.Core;
-import org.opencv.videoio.VideoCapture;
 import java.util.Scanner;
 
 class RGBObject
@@ -7,6 +6,15 @@ class RGBObject
     double R; // RED
     double G; // GREEN
     double B; // BLUE
+
+    RGBObject(){}
+
+    RGBObject(double r, double g, double b)
+    {
+        this.R = r;
+        this.G = g;
+        this.B = b;
+    }
 }
 
 public class Program
@@ -14,6 +22,8 @@ public class Program
     // scanner and choice are used for any user interactions
     static Scanner scanner = new Scanner(System.in);
     static int choice = -1;
+
+    private String type; // RGB, XYZ, etc
 
     public static void main(String[] args)
     {
@@ -23,14 +33,15 @@ public class Program
         System.out.println("Which program would you like to run?");
         System.out.println("1. First program");
         System.out.println("2. Second program");
+        Program program = new Program();
         int choice = scanner.nextInt();
         if (choice == 1)
         {
-            firstProgram();
+            program.firstProgram();
         }
         else if (choice == 2)
         {
-            secondProgram();
+            program.secondProgram();
         }
         else
         {
@@ -38,8 +49,12 @@ public class Program
         }
     }
 
-    public static void firstProgram()
+    public void firstProgram()
     {
+        RGBObject rgbObject1 = null;
+        RGBObject rgbObject2 = null;
+        RGBObject rgbObject3 = null;
+
         String colorSpaces [] = {"", "RGB", "XYZ", "Lab", "YUV", "YCbCr", "YIQ", "HSL"};
 
         // Menu
@@ -108,7 +123,8 @@ public class Program
                 thirdComponent = "B";
         }
 
-        System.out.println("### You have Selected " + colorSpaces[choice] + " Color Model ###");
+        type = colorSpaces[choice];
+        System.out.println("### You have Selected " + type + " Color Model ###");
         System.out.print("\nEnter Component Cit " + firstComponent + " Component - ");
         int CitFirstComponent = scanner.nextInt();
         System.out.print("\nEnter Component Cit " + secondComponent + " Component - ");
@@ -133,12 +149,49 @@ public class Program
         int CiTThirdComponent = scanner.nextInt();
         System.out.println("\n### CiT - < " + CiTFirstComponent + "," + CiTSecondComponent + "," + CiTThirdComponent + " > ###");
 
+        // If type is not RGB, convert to RGB
+        switch(choice)
+        {
+            case 2:
+                rgbObject1 = convertXYZToRGB(CitFirstComponent, CitSecondComponent, CitThirdComponent);
+                rgbObject2 = convertXYZToRGB(Ci0FirstComponent, Ci0SecondComponent, Ci0ThirdComponent);
+                rgbObject3 = convertXYZToRGB(CiTFirstComponent, CiTSecondComponent, CiTThirdComponent);
+                break;
+            case 3:
+                rgbObject1 = convertLabToRGB(CitFirstComponent, CitSecondComponent, CitThirdComponent);
+                rgbObject2 = convertLabToRGB(Ci0FirstComponent, Ci0SecondComponent, Ci0ThirdComponent);
+                rgbObject3 = convertLabToRGB(CiTFirstComponent, CiTSecondComponent, CiTThirdComponent);
+                break;
+            case 4:
+                rgbObject1 = convertYUVToRGB(CitFirstComponent, CitSecondComponent, CitThirdComponent);
+                rgbObject2 = convertYUVToRGB(Ci0FirstComponent, Ci0SecondComponent, Ci0ThirdComponent);
+                rgbObject3 = convertYUVToRGB(CiTFirstComponent, CiTSecondComponent, CiTThirdComponent);
+                break;
+            case 5:
+                rgbObject1 = convertYCbCrToRGB(CitFirstComponent, CitSecondComponent, CitThirdComponent);
+                rgbObject2 = convertYCbCrToRGB(Ci0FirstComponent, Ci0SecondComponent, Ci0ThirdComponent);
+                rgbObject3 = convertYCbCrToRGB(CiTFirstComponent, CiTSecondComponent, CiTThirdComponent);
+                break;
+            case 6:
+                rgbObject1 = convertYIQToRGB(CitFirstComponent, CitSecondComponent, CitThirdComponent);
+                rgbObject2 = convertYIQToRGB(Ci0FirstComponent, Ci0SecondComponent, Ci0ThirdComponent);
+                rgbObject3 = convertYIQToRGB(CiTFirstComponent, CiTSecondComponent, CiTThirdComponent);
+                break;
+            default:
+                break;
+        }
+
         System.out.print("\nEnter the Number of bits <b>:");
         int b = scanner.nextInt();
-
-        System.out.println("### Total of " + (int) Math.pow((double) 2, (double) b) + " color instance would be created ###");
+        int colorInstances = (int) Math.pow((double) 2, (double) b);
+        System.out.println("### Total of " + colorInstances  + " color instance would be created ###");
         System.out.println("\n### Color map created ###");
-        System.out.println("\n### File saved as " + "" + " ###");
+
+        String fileName = type + "_" + CitFirstComponent + "-" + CitSecondComponent + "-" + CitThirdComponent
+                + "_" + Ci0FirstComponent + "-" + Ci0SecondComponent + "-" + Ci0ThirdComponent
+                + "_" + CiTFirstComponent + "-" + CiTSecondComponent + "-" + CiTThirdComponent
+                + ".txt";
+        System.out.println("\n### File saved as " + fileName + " ###");
 
         System.out.println("Visualize Color Model[Y/N]: ");
         String response = scanner.next().trim();
@@ -150,21 +203,17 @@ public class Program
 
         if (showColorMap)
         {
-            // TODO: Color map logic here
-            RGBObject matrix [][] = new RGBObject[10][10];
-
+            DisplayColorMap dcm = new DisplayColorMap();
+            if (choice == 1 || choice == 7)
+            {
+                dcm.setColorMapValues(colorInstances, CitFirstComponent, CitSecondComponent, CitThirdComponent, Ci0FirstComponent, Ci0SecondComponent, Ci0ThirdComponent, CiTFirstComponent, CiTSecondComponent, CiTThirdComponent, type);
+            }
+            else
+            {
+                dcm.setColorMapValues(colorInstances, rgbObject1.R, rgbObject1.G, rgbObject1.B, rgbObject2.R, rgbObject2.G, rgbObject2.B, rgbObject3.R, rgbObject3.G, rgbObject3.B, type);
+            }
+            dcm.createColorMap(dcm);
         }
-
-        // Creates a color map (with 2^b color instances) which maps each value
-        // in range -1.0 to 1.0 to a color instance in the chosen color space
-        // such that the value -1.0 maps to the floor color instance, 0.0 maps
-        // to the middle color instance, and 1.0 maps to the ceiling color instance.
-        // The mapping function should be continuous.
-        // The program should output the resulting color map into an ASCII text file
-        // as well as display it by visually painting the colors in the color map.
-
-
-
     }
 
     // Calculation from www.easyrgb.com/index.php?X=MATH&H=01#text01
