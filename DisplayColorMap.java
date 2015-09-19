@@ -6,6 +6,7 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -141,9 +142,12 @@ public class DisplayColorMap
     public void createASCIIFile()
     {
         BufferedWriter bw = null;
-        fileName = type + "_" + CitFirstComponent + "-" + CitSecondComponent + "-" + CitThirdComponent
-                        + "_" + Ci0FirstComponent + "-" + Ci0SecondComponent + "-" + Ci0ThirdComponent
-                        + "_" + CiTFirstComponent + "-" + CiTSecondComponent + "-" + CiTThirdComponent
+
+        // Decimal format to round double values to two places
+        DecimalFormat df = new DecimalFormat("####0.00");
+        fileName = type + "_" + df.format(CitFirstComponent) + "-" + df.format(CitSecondComponent) + "-" + df.format(CitThirdComponent)
+                        + "_" + df.format(Ci0FirstComponent) + "-" + df.format(Ci0SecondComponent) + "-" + df.format(Ci0ThirdComponent)
+                        + "_" + df.format(CiTFirstComponent) + "-" + df.format(CiTSecondComponent) + "-" + df.format(CiTThirdComponent)
                         + ".txt";
         try
         {

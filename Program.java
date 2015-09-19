@@ -187,11 +187,11 @@ public class Program
         System.out.println("### Total of " + colorInstances  + " color instance would be created ###");
         System.out.println("\n### Color map created ###");
 
-        String fileName = type + "_" + CitFirstComponent + "-" + CitSecondComponent + "-" + CitThirdComponent
-                + "_" + Ci0FirstComponent + "-" + Ci0SecondComponent + "-" + Ci0ThirdComponent
-                + "_" + CiTFirstComponent + "-" + CiTSecondComponent + "-" + CiTThirdComponent
-                + ".txt";
-        System.out.println("\n### File saved as " + fileName + " ###");
+        //String fileName = type + "_" + CitFirstComponent + "-" + CitSecondComponent + "-" + CitThirdComponent
+        //        + "_" + Ci0FirstComponent + "-" + Ci0SecondComponent + "-" + Ci0ThirdComponent
+        //        + "_" + CiTFirstComponent + "-" + CiTSecondComponent + "-" + CiTThirdComponent
+        //        + ".txt";
+        System.out.println("\n### File saved! ###");
 
         System.out.println("Visualize Color Model[Y/N]: ");
         String response = scanner.next().trim();
@@ -339,10 +339,6 @@ public class Program
 
     public static void secondProgram()
     {
-        System.out.println("Select a video by choosing any number between 1 and 10.");
-        choice = scanner.nextInt();
-
-        String videoFilePath = "C:\\Users\\JAKE\\Desktop\\sampleData\\" + Integer.toString(choice);
-        // Put actual useful code here
+        // Saul's code here
     }
 }
