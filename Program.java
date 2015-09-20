@@ -1,5 +1,15 @@
 import org.opencv.core.Core;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
+import org.opencv.videoio.Videoio;
+import org.opencv.imgcodecs.Imgcodecs;
+import org.opencv.core.Mat;
+import org.opencv.videoio.VideoCapture;
+import org.opencv.imgproc.Imgproc;
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 class RGBObject
 {
@@ -339,6 +349,129 @@ public class Program
 
     public static void secondProgram()
     {
-        // Saul's code here
+        VideoCapture vc = new VideoCapture();
+
+        //dummy arrays to represent a color map file
+        //double[] max = {-.9,-.8,-.7,-.6,-.5,-.4,.7,1};
+        //int[] component1 = {50,100,0,30,20,45,200,50};
+        //int[] component2 = {0,45,0,54,150,8,200,50};
+        //int[] component3 = {100,245,234,30,80,100,0,50};
+
+        List<Double> maxes = new ArrayList<Double>();
+        List<Double> component1 = new ArrayList<Double>();
+        List<Double> component2 = new ArrayList<Double>();
+        List<Double> component3 = new ArrayList<Double>();
+
+        //consume newline character left by nextInt
+        //scanner.nextLine();
+        System.out.println("Enter the Path of the Folder containing video Files");
+        String path = scanner.nextLine();
+        System.out.println("Enter the videofile name");
+        String filename = scanner.nextLine();
+        System.out.println("Enter frame rate");
+        scanner.nextLine();
+        System.out.println("Enter first frame");
+        int firstFrame = scanner.nextInt();
+        System.out.println("Enter second frame");
+        int secondFrame = scanner.nextInt();
+        scanner.nextLine();    //consume newline character left by nextInt
+        System.out.println("Enter the color map file name");
+        String colorMap = scanner.nextLine();
+
+        //parse the color-map once the user enters the name
+        try{
+            FileReader file = new FileReader(colorMap);
+            BufferedReader reader = new BufferedReader(file);
+            String line = reader.readLine();
+            while (line != null)
+            {
+                if (line.contains("->"))
+                {
+                    // 1st section is the bit number
+                    // 2nd section is the range
+                    // 3rd section is the rgb value
+                    String sections[] = line.split("->");
+                    System.out.println("Section 2: " + sections[1]);
+                    int indexOfAfterComma = sections[1].lastIndexOf(',') + 1;
+                    int indexOfParenthesis = sections[1].lastIndexOf(')');
+                    double maxValueInRange = Double.parseDouble(sections[1].substring(indexOfAfterComma, indexOfParenthesis));
+                    maxes.add(maxValueInRange);
+                    System.out.println("Max value of range is: " + maxValueInRange);
+                    System.out.println("Section 3: " + sections[2]);
+                    String rgbValues[] = sections[2].split(",");
+                    double redValue = Double.parseDouble(rgbValues[0].trim());
+                    double greenValue = Double.parseDouble(rgbValues[1].trim());
+                    double blueValue = Double.parseDouble(rgbValues[2].trim());
+                    System.out.println("R: " + redValue + " G: " + greenValue + " B: " + blueValue);
+                    component1.add(redValue);
+                    component2.add(greenValue);
+                    component3.add(blueValue);
+                }
+                line = reader.readLine();
+            }
+
+            reader.close();
+        }catch (Exception e) {}
+
+        //open the video specified by user
+        vc.open(path + filename);
+        //System.out.println(vc.get(Videoio.CAP_PROP_FRAME_COUNT));
+
+        //retrieve first frame
+        vc.set(Videoio.CAP_PROP_POS_FRAMES, firstFrame);
+        Mat frame = new Mat();
+        vc.grab();
+        vc.retrieve(frame);
+
+        //retrieve second frame
+        vc.set(Videoio.CAP_PROP_POS_FRAMES, secondFrame);
+        Mat frame2 = new Mat();
+        vc.grab();
+        vc.retrieve(frame2);
+
+        //create original images
+        Imgcodecs.imwrite("firstFrame.jpg", frame);
+        Imgcodecs.imwrite("secondFrame.jpg", frame2);
+
+        //convert both frames to 8 bit gray-scale
+        Imgproc.cvtColor(frame, frame, Imgproc.COLOR_BGR2GRAY);
+        Imgproc.cvtColor(frame2, frame2, Imgproc.COLOR_BGR2GRAY);
+
+        //calculate the difference between both frames
+        Mat diff = new Mat();
+        Core.absdiff(frame, frame2, diff);
+
+        //create difference image
+        Imgcodecs.imwrite("difference.jpg", diff);
+
+        //convert difference image back to RGB for more color channels
+        Imgproc.cvtColor(diff, diff, Imgproc.COLOR_GRAY2BGR);
+
+        //loop through the image and apply the colors from color map
+        for(int i=0; i<diff.height(); i++){
+
+            for(int j=0; j<diff.cols(); j++){
+
+                double[] rgb4 = diff.get(i, j);
+                double value = scale(rgb4[0],0,255,-1,1);
+
+                for(int k = 0; k < maxes.size(); k++){
+                    if(value < maxes.get(k)){
+                        diff.put(i, j, new double[]{component1.get(k),component2.get(k),component3.get(k)});
+                        break;
+                    }
+                }
+
+            }
+        }
+
+        //create the three images
+        Imgcodecs.imwrite("firstFrameGray.jpg", frame);
+        Imgcodecs.imwrite("secondFrameGray.jpg", frame2);
+        Imgcodecs.imwrite("Final.jpg", diff);
+
+    }
+    public static double scale(double valueIn, double baseMin, double baseMax, double limitMin, double limitMax) {
+        return ((limitMax - limitMin) * (valueIn - baseMin) / (baseMax - baseMin)) + limitMin;
     }
 }
