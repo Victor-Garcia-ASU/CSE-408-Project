@@ -10,9 +10,9 @@ System Requirements:
 * Eclipse IDE for Java Developers (64 bit) for Windows
 
 Installation Instructions:
-1 Download and install the appropriate version of Java 1.7.X for your OS.
+1. Download and install the appropriate version of Java 1.7.X for your OS.
 
-2 Add the path to the jdk bin directory to the path variable in system variables.
+2. Add the path to the jdk bin directory to the path variable in system variables.
 
 3. Download and install OpenCV 3.0
 
