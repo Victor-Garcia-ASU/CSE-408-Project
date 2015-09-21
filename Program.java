@@ -3,11 +3,20 @@ import org.opencv.core.Core;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+
 import org.opencv.videoio.Videoio;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.core.Mat;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.imgproc.Imgproc;
+
+import java.awt.FlowLayout;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
 import java.io.BufferedReader;
 import java.io.FileReader;
 
@@ -347,23 +356,17 @@ public class Program
         return rgbObject;
     }
 
-    public static void secondProgram()
+    public void secondProgram()
     {
-        VideoCapture vc = new VideoCapture();
-
-        //dummy arrays to represent a color map file
-        //double[] max = {-.9,-.8,-.7,-.6,-.5,-.4,.7,1};
-        //int[] component1 = {50,100,0,30,20,45,200,50};
-        //int[] component2 = {0,45,0,54,150,8,200,50};
-        //int[] component3 = {100,245,234,30,80,100,0,50};
-
+    	VideoCapture vc = new VideoCapture();
+        
         List<Double> maxes = new ArrayList<Double>();
         List<Double> component1 = new ArrayList<Double>();
         List<Double> component2 = new ArrayList<Double>();
         List<Double> component3 = new ArrayList<Double>();
 
         //consume newline character left by nextInt
-        //scanner.nextLine();
+        scanner.nextLine();
         System.out.println("Enter the Path of the Folder containing video Files");
         String path = scanner.nextLine();
         System.out.println("Enter the videofile name");
@@ -391,18 +394,17 @@ public class Program
                     // 2nd section is the range
                     // 3rd section is the rgb value
                     String sections[] = line.split("->");
-                    System.out.println("Section 2: " + sections[1]);
+                    
                     int indexOfAfterComma = sections[1].lastIndexOf(',') + 1;
                     int indexOfParenthesis = sections[1].lastIndexOf(')');
                     double maxValueInRange = Double.parseDouble(sections[1].substring(indexOfAfterComma, indexOfParenthesis));
                     maxes.add(maxValueInRange);
-                    System.out.println("Max value of range is: " + maxValueInRange);
-                    System.out.println("Section 3: " + sections[2]);
+                   
                     String rgbValues[] = sections[2].split(",");
                     double redValue = Double.parseDouble(rgbValues[0].trim());
                     double greenValue = Double.parseDouble(rgbValues[1].trim());
                     double blueValue = Double.parseDouble(rgbValues[2].trim());
-                    System.out.println("R: " + redValue + " G: " + greenValue + " B: " + blueValue);
+                    
                     component1.add(redValue);
                     component2.add(greenValue);
                     component3.add(blueValue);
@@ -433,27 +435,64 @@ public class Program
         Imgcodecs.imwrite("firstFrame.jpg", frame);
         Imgcodecs.imwrite("secondFrame.jpg", frame2);
 
+        System.out.println("### Extracting the Grayscale for frame " + firstFrame + " and " + secondFrame +  " ###");
         //convert both frames to 8 bit gray-scale
         Imgproc.cvtColor(frame, frame, Imgproc.COLOR_BGR2GRAY);
         Imgproc.cvtColor(frame2, frame2, Imgproc.COLOR_BGR2GRAY);
-
+        System.out.println("### Extraction Done ###");
+        
+        String firstFrameFile = "file1_" + firstFrame + "_gray.jpg";
+        String secondFrameFile = "file1_" + secondFrame + "_gray.jpg";
+        System.out.println("### Extracted Grayscale saves as <" + firstFrameFile + "> and <" + secondFrameFile + " ##");
+        Imgcodecs.imwrite(firstFrameFile, frame);
+        Imgcodecs.imwrite(secondFrameFile, frame2);
+        
+        System.out.print("\nDo you want to visualize the Frames [Y/N]:");
+        String response = scanner.next().trim();
+        
+        while (response.equalsIgnoreCase("Y")){
+        	System.out.println("Select one of the option:");
+        	System.out.println("Press 1 for Frame " + firstFrame);
+        	System.out.println("Press 2 for Frame " + secondFrame);
+        	System.out.println("Press 3 to move forward");
+        	System.out.print("Choice: ");
+        	int choice = scanner.nextInt();
+        	
+        	if(choice == 1){
+        		BufferedImage image;
+            	image = Mat2BufferedImage(frame);
+            	displayImage(image);
+        	}
+        	else if(choice == 2){
+        		BufferedImage image;
+            	image = Mat2BufferedImage(frame2);
+            	displayImage(image);
+        	}
+        	else if(choice == 3){
+        		response = "N";
+        	}
+        }
+        
+        System.out.println("### Determining the Grayscale difference image ###");
         //calculate the difference between both frames
         Mat diff = new Mat();
         Core.absdiff(frame, frame2, diff);
-
+        System.out.println("### Computation of grayscale difference image done ###");
+        
         //create difference image
         Imgcodecs.imwrite("difference.jpg", diff);
 
         //convert difference image back to RGB for more color channels
         Imgproc.cvtColor(diff, diff, Imgproc.COLOR_GRAY2BGR);
-
+        System.out.println("### Rescaling of grayscale difference image done ###");
+        
         //loop through the image and apply the colors from color map
         for(int i=0; i<diff.height(); i++){
 
             for(int j=0; j<diff.cols(); j++){
 
                 double[] rgb4 = diff.get(i, j);
-                double value = scale(rgb4[0],0,255,-1,1);
+                double value = scale(rgb4[0],-255,255,-1,1);
 
                 for(int k = 0; k < maxes.size(); k++){
                     if(value < maxes.get(k)){
@@ -464,14 +503,47 @@ public class Program
 
             }
         }
-
+        System.out.println("### Recoloring of Grayscale Difference image done ###");
+        System.out.println("### Check out the visualization ###");
+        
         //create the three images
-        Imgcodecs.imwrite("firstFrameGray.jpg", frame);
-        Imgcodecs.imwrite("secondFrameGray.jpg", frame2);
         Imgcodecs.imwrite("Final.jpg", diff);
-
+        
+        //display the final colored image
+        BufferedImage image;
+    	image = Mat2BufferedImage(diff);
+    	displayImage(image);
     }
     public static double scale(double valueIn, double baseMin, double baseMax, double limitMin, double limitMax) {
         return ((limitMax - limitMin) * (valueIn - baseMin) / (baseMax - baseMin)) + limitMin;
+    }
+    //convert openCV mat to BufferedImage
+    // source: http://answers.opencv.org/question/10344/opencv-java-load-image-to-gui/
+    public static BufferedImage Mat2BufferedImage(Mat m){
+    		int type = BufferedImage.TYPE_BYTE_GRAY;
+    	    if ( m.channels() > 1 ) {
+    	        type = BufferedImage.TYPE_3BYTE_BGR;
+    	    }
+    	    int bufferSize = m.channels()*m.cols()*m.rows();
+    	    byte [] b = new byte[bufferSize];
+    	    m.get(0,0,b); // get all the pixels
+    	    BufferedImage image = new BufferedImage(m.cols(),m.rows(), type);
+    	    final byte[] targetPixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+    	    System.arraycopy(b, 0, targetPixels, 0, b.length);  
+    	    return image;
+
+    }
+    //display an image
+    public static void displayImage(BufferedImage img2)
+    {   
+        ImageIcon icon=new ImageIcon(img2);
+        JFrame frame=new JFrame();
+        frame.setLayout(new FlowLayout());        
+        frame.setSize(img2.getWidth(null)+50, img2.getHeight(null)+50);     
+        JLabel lbl=new JLabel();
+        lbl.setIcon(icon);
+        frame.add(lbl);
+        frame.setVisible(true);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 }
