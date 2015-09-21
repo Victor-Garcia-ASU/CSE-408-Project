@@ -10,6 +10,7 @@ System Requirements:
 * Eclipse IDE for Java Developers (64 bit) for Windows
 
 Installation Instructions:
+
 1. Download and install the appropriate version of Java 1.7.X for your OS.
 
 2. Add the path to the jdk bin directory to the path variable in system variables.
@@ -23,6 +24,7 @@ Installation Instructions:
 6. Clone repository to desktop and grab both Program.java and DisplayColorMap.java and place them in src directory of Eclipse.
 
 Execution Instructions: 
+
 1. In eclipse navigate to Window –> Preferences from the menu.
 
 2. Navigate under Java –> Build Path –> User Libraries and click New (give it a name).
